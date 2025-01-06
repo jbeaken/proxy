@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: captainhook
+  labels:
+    app.kubernetes.io/name: captainhook
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1  # Allow one pod to be unavailable
+      maxSurge: 1        # Allow one extra pod above replicas during update
+  selector:
+    matchLabels:
+      app: captainhook
+  template:
+    metadata:
+      labels:
+        app: captainhook
+    spec:
+      #set to preStop + spring.lifecycle.timeout-per-shutdown-phase
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: captainhook-secret
+          secret:
+            secretName: captainhook-secret
+        - name: captainhook-configmap
+          configMap:
+            name: captainhook-configmap
+      containers:
+      - name: captainhook
+        image: captainhook
+        volumeMounts:
+          - name: "captainhook-secret"
+            readOnly: true
+            mountPath: "/etc/secrets/captainhook-secret"
+          - name: "captainhook-configmap"
+            readOnly: true
+            mountPath: "/etc/configmap/captainhook-configmap"
+        resources:
+          requests:
+            memory: "2000Mi"
+            cpu: "2000m"
+          limits:
+            # Do not set cpu limit https://home.robusta.dev/blog/stop-using-cpu-limits/
+            memory: "2000Mi"
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          failureThreshold: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          failureThreshold: 3
+          periodSeconds: 3
+        startupProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          failureThreshold: 10
+          periodSeconds: 3
+          initialDelaySeconds: 30
+        lifecycle:
+          preStop:
+            exec:
+              command: ["sh", "-c", "sleep 10"]
+        env:
+          - name: NEW_RELIC_LICENSE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: captainhook-secret
+                key: newrelic_license_key
+          - name: NEW_RELIC_DISTRIBUTED_TRACING_ENABLED
+            value: "false"

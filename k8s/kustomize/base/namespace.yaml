@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev-captainhook
+  labels:
+    cortex.elsevier.systems/contact: Team_Tiger_ReedElsevier.com
+    cortex.elsevier.systems/costcode: "22434"
+    cortex.elsevier.systems/environment: nonprod-dev
+    cortex.elsevier.systems/orchestration: elsevier-centraltechnology_apim-administration
+    cortex.elsevier.systems/tenant-name: kong
+    cortex.elsevier.systems/unique-platform-name: kong-nonprod
+

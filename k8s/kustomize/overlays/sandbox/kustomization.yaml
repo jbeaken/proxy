@@ -1,0 +1,75 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - ../../contrast
+  - service.yaml
+patches:
+  - target:
+      kind: Deployment
+      name: dma
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NEW_RELIC_APP_NAME
+          value: dma-sandbox
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NEW_RELIC_DISTRIBUTED_HOST_DISPLAY_NAME
+          value: DMA-Sandbox
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: replace
+        path: /spec/strategy/rollingUpdate/maxUnavailable
+        value: 0  # No downtime allowed
+      - op: replace
+        path: /spec/strategy/rollingUpdate/maxSurge
+        value: 1  # Adds one pod before terminating old one
+      - op: add
+        path: /metadata/labels/contrast
+        value: monitored
+  - target:
+      kind: Namespace
+      name: dma
+    patch: |-
+      - op: add
+        path: /metadata/labels/cortex.elsevier.systems~1environment
+        value: "nonprod-sandbox"
+      - op: add
+        path: /metadata/labels/cortex.elsevier.systems~1unique-platform-name
+        value: "ssdrapim-cluster-nonprod-us-east-2"
+      - op: replace
+        path: /metadata/name
+        value: "sandbox-dma"
+  - target:
+      kind: Service
+      name: dma
+    patch: |-
+      - op: add
+        path: /metadata/annotations/service.beta.kubernetes.io~1aws-load-balancer-ssl-cert
+        value: arn:aws:acm:us-east-2:956698698055:certificate/0af654b8-a036-4ac0-87aa-6dbdd8438130
+      - op: add
+        path: /metadata/annotations/service.beta.kubernetes.io~1aws-load-balancer-internal
+        value: true
+      - op: add
+        path: /spec/loadBalancerSourceRanges
+        value:
+          - 0.0.0.0/0
+  - target:
+      kind: Ingress
+      name: dma
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: research-portal.sandbox-developers.elsevier.net
+configMapGenerator:
+  - name: dma-configmap
+    files:
+      - application.properties
+secretGenerator:
+  - name: dma-secret
+    envs:
+      - secrets.properties

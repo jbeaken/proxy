@@ -1,0 +1,110 @@
+apiVersion: skaffold/v4beta2
+kind: Config
+metadata:
+  name: captainhook
+build:
+  artifacts:
+    - image: 595468393306.dkr.ecr.eu-west-1.amazonaws.com/captainhook
+      context: .
+      buildpacks:
+        builder: paketobuildpacks/builder-jammy-base
+        buildpacks:
+          - paketo-buildpacks/java
+          - paketo-buildpacks/new-relic
+        volumes:
+          - host: /home/jenkins/agent/workspace/DMA/dma/bindings/gradle
+            target: /platform/bindings/gradle
+            options: "ro"
+          - host: /home/jenkins/agent/workspace/DMA/dma/bindings/new-relic
+            target: /platform/bindings/new-relic
+            options: "ro"
+        env:
+          - BP_JVM_VERSION=17
+          - BP_LOG_LEVEL=INFO
+          - BP_GRADLE_BUILT_ARTIFACT=build/libs/*.jar
+          - BP_GRADLE_BUILD_ARGUMENTS=--no-daemon -Dorg.gradle.welcome=never assemble
+manifests:
+  kustomize:
+    paths:
+      - k8s/kustomize/overlays/dev
+
+deploy:
+  kubectl: {}
+profiles:
+  - name: local
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: captainhook
+      - op: replace
+        path: /build/artifacts/0/buildpacks/volumes/0/host
+        value: /home/git/ssdr/ssdr-kong-developer-manager/dma/bindings/gradle
+      - op: replace
+        path: /build/artifacts/0/buildpacks/volumes/1/host
+        value: /home/git/ssdr/ssdr-kong-developer-manager/dma/bindings/new-relic
+    manifests:
+      kustomize:
+        paths:
+          - k8s/kustomize/overlays/local
+
+    portForward:
+      - resourceType: service
+        resourceName: captainhook
+        namespace: default
+        port: 8080
+        localPort: 8080
+
+  - name: dev
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: 595468393306.dkr.ecr.eu-west-1.amazonaws.com/captainhook
+      - op: replace
+        path: /build/artifacts/0/buildpacks/volumes/0/host
+        value: /home/git/ssdr/ssdr-kong-developer-manager/dma/bindings/gradle
+      - op: replace
+        path: /build/artifacts/0/buildpacks/volumes/1/host
+        value: /home/git/ssdr/ssdr-kong-developer-manager/dma/bindings/new-relic
+      - op: add
+        path: /build/tagPolicy
+        value:
+          gitCommit: {}
+  - name: sandbox
+    manifests:
+      kustomize:
+        paths:
+          - k8s/kustomize/overlays/sandbox
+  - name: nonprod
+    manifests:
+      kustomize:
+        paths:
+          - dma/k8s/kustomize/overlays/nonprod
+  - name: prod
+    patches:
+      - op: replace
+        path: /build/artifacts/0/image
+        value: 953990266881.dkr.ecr.us-east-2.amazonaws.com/dma
+    manifests:
+      kustomize:
+        paths:
+          - k8s/kustomize/overlays/prod
+  - name: local-deploy
+    patches:
+      # remove newrelic
+      - op: remove
+        path: /build/artifacts/0/buildpacks/buildpacks/1
+      - op: replace
+        path: /build/artifacts/0/buildpacks/volumes/0/host
+        value: /Users/beakenj/git/proxy/bindings/gradle
+      - op: replace
+        path: /build/artifacts/0/buildpacks/volumes/1/host
+        value: /Users/beakenj/git/proxy/bindings/new-relic
+      - op: add
+        path: /build/artifacts/0/buildpacks/volumes/-
+        value:
+          host : /Users/beakenj/bindings/ca-certificates
+          target: /platform/bindings/ca-certificates
+          options: "rw"
+
+
+

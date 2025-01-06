@@ -1,0 +1,46 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - ../../contrast
+  - service.yaml
+  - ingress.yaml
+patches:
+  - target:
+      kind: Deployment
+      name: dma
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NEW_RELIC_APP_NAME
+          value: dma-nonprod
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NEW_RELIC_DISTRIBUTED_HOST_DISPLAY_NAME
+          value: DMA-Nonprod
+      - op: add
+        path: /metadata/labels/contrast
+        value: monitored
+  - target:
+      kind: Namespace
+      name: dma
+    patch: |-
+      - op: add
+        path: /metadata/labels/cortex.elsevier.systems~1environment
+        value: "nonprod"
+      - op: add
+        path: /metadata/labels/cortex.elsevier.systems~1unique-platform-name
+        value: "ssdrapim-cluster-nonprod-us-east-2"
+      - op: replace
+        path: /metadata/name
+        value: "dev-captainhook"
+configMapGenerator:
+  - name: dma-configmap
+    files:
+      - application.properties
+secretGenerator:
+  - name: dma-secret
+    envs:
+      - secrets.properties

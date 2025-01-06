@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: jenkins-core-eng.developers.dev.apim.elsevier.systems
+    meta.helm.sh/release-name: dev-jenkins-core-eng
+    meta.helm.sh/release-namespace: dev-captainhook
+    zalando.org/aws-load-balancer-scheme: internal
+    zalando.org/skipper-predicate: SourceFromLast("10.0.0.0/8", "100.67.0.0/16") &&
+      ClientIP("10.0.0.0/8", "100.67.0.0/16")
+  labels:
+    app.kubernetes.io/component: jenkins-controller
+    app.kubernetes.io/instance: dev-jenkins-core-eng
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: jenkins
+    helm.sh/chart: jenkins-5.7.26
+  name: dev-jenkins-core-eng
+spec:
+  ingressClassName: skipper
+  rules:
+    - host: jenkins-core-eng.developers.dev.apim.elsevier.systems
+      http:
+        paths:
+          - backend:
+              service:
+                name: captainhook
+                port:
+                  number: 8080
+            path: /
+            pathType: ImplementationSpecific
+

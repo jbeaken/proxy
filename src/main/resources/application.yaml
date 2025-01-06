@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: proxy
+management:
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  endpoint:
+    env:
+      enabled: true
+    health:
+      probes:
+        enabled: true

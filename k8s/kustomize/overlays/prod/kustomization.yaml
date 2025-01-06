@@ -1,0 +1,52 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  - service.yaml
+  - ingress.yaml
+patches:
+  - target:
+      kind: Deployment
+      name: dma
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NEW_RELIC_APP_NAME
+          value: dma-prod
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: "953990266881.dkr.ecr.us-east-2.amazonaws.com/dma"
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: NEW_RELIC_DISTRIBUTED_HOST_DISPLAY_NAME
+          value: DMA-Prod
+  - target:
+      kind: Namespace
+      name: dma
+    patch: |-
+      - op: add
+        path: /metadata/labels/cortex.elsevier.systems~1environment
+        value: "prod"
+      - op: add
+        path: /metadata/labels/cortex.elsevier.systems~1unique-platform-name
+        value: "ssdrapim-cluster-prod-us-east-2"
+      - op: replace
+        path: /metadata/name
+        value: "prod-ingress-dma"
+  - target:
+      kind: Ingress
+      name: dma
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: research-portal.developers.elsevier.com
+configMapGenerator:
+  - name: dma-configmap
+    files:
+      - application.properties
+secretGenerator:
+  - name: dma-secret
+    envs:
+      - secrets.properties

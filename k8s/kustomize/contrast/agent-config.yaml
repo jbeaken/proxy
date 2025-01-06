@@ -1,0 +1,7 @@
+apiVersion: agents.contrastsecurity.com/v1beta1
+kind: AgentConfiguration
+metadata:
+  name: dma-contrast-agent-config
+spec:
+  suppressDefaultServerName: false
+  suppressDefaultApplicationName: false

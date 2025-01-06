@@ -1,0 +1,12 @@
+apiVersion: agents.contrastsecurity.com/v1beta1
+kind: AgentInjector
+metadata:
+  name: dma-contrast-agent-injector
+spec:
+  type: java
+  configuration:
+    name: dma-contrast-agent-config
+  selector:
+    labels:
+      - name: contrast
+        value: monitored
