@@ -13,3 +13,11 @@ management:
     health:
       probes:
         enabled: true
+
+logging:
+  level:
+    org:
+      apache:
+        hc:
+          client5:
+            http: DEBUG
