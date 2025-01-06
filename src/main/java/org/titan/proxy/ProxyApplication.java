@@ -48,7 +48,8 @@ public class ProxyApplication {
 			log.info("headers: {}", headers);
 			log.info("request body {}", body);
 
-			apimJenkinsWebhookClient.sendWebhook(body, headers);
+			apimJenkinsWebhookClient.sendWebhook(body);
+//			apimJenkinsWebhookClient.sendWebhook(body, headers);
 		}
 
 		@PostMapping("/core")
@@ -73,7 +74,6 @@ public class ProxyApplication {
 
 			RestClient webClient = restClientBuilder
 					.baseUrl("https://jenkins.sandbox.kong-nonprod.cortex.elsevier.systems")
-					.defaultHeader("test", "test")
 					.build();
 
 			HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
@@ -88,7 +88,6 @@ public class ProxyApplication {
 
 			RestClient webClient = restClientBuilder
 					.baseUrl("http://dev-jenkins.dev-jenkins.svc.cluster.local:8080")
-					.defaultHeader("test", "test")
 					.build();
 
 			HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
@@ -106,6 +105,7 @@ public class ProxyApplication {
 
 	public interface ApimJenkinsWebhookClient {
 		@PostExchange(url = "/github-webhook/")
-		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
+//		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
+		String sendWebhook(@RequestBody String requestBody);
 	}
 }
