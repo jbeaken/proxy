@@ -41,6 +41,7 @@ public class ProxyApplication {
 		void post(@RequestBody String body, HttpServletRequest request) {
 			Map<String, String> headers = Collections.list(request.getHeaderNames())
 					.stream()
+					.filter(headerName -> !headerName.equals("content-length"))
 					.collect(Collectors.toMap(h -> h, request::getHeader));
 
 			log.info(request.toString());
@@ -48,8 +49,8 @@ public class ProxyApplication {
 			log.info("headers: {}", headers);
 			log.info("request body {}", body);
 
-			apimJenkinsWebhookClient.sendWebhook(body);
-//			apimJenkinsWebhookClient.sendWebhook(body, headers);
+//			apimJenkinsWebhookClient.sendWebhook(body);
+			apimJenkinsWebhookClient.sendWebhook(body, headers);
 		}
 
 		@PostMapping("/core")
@@ -105,7 +106,7 @@ public class ProxyApplication {
 
 	public interface ApimJenkinsWebhookClient {
 		@PostExchange(url = "/github-webhook/")
-//		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
-		String sendWebhook(@RequestBody String requestBody);
+		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
+//		String sendWebhook(@RequestBody String requestBody);
 	}
 }
