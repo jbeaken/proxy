@@ -16,6 +16,8 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 public class ProxyApplication {
@@ -36,24 +38,30 @@ public class ProxyApplication {
 
         @PostMapping("/proxy")
 		void post(@RequestBody String body, HttpServletRequest request) {
-			ArrayList<String> headerNames = Collections.list(request.getHeaderNames());
+			Map<String, String> headers = Collections.list(request.getHeaderNames())
+					.stream()
+					.collect(Collectors.toMap(h -> h, request::getHeader));
+
 			log.info(request.toString());
 			log.info(request.getRequestURI());
-			log.info("headerNames: {}", headerNames);
+			log.info("headers: {}", headers);
 			log.info("request body {}", body);
 
-			jenkinsWebhookClient.sendWebhook(body);
+			jenkinsWebhookClient.sendWebhook(body, headers);
 		}
 
 		@PostMapping("/jenkins")
 		void jenkins(@RequestBody String body, HttpServletRequest request) {
-			ArrayList<String> headerNames = Collections.list(request.getHeaderNames());
+			Map<String, String> headers = Collections.list(request.getHeaderNames())
+					.stream()
+					.collect(Collectors.toMap(h -> h, request::getHeader));
+
 			log.info(request.toString());
 			log.info(request.getRequestURI());
-			log.info("headerNames: {}", headerNames);
+			log.info("headers: {}", headers);
 			log.info("request body {}", body);
 			
-			jenkinsWebhookClient.sendWebhook(body);
+			jenkinsWebhookClient.sendWebhook(body, headers);
 		}
 	}
 
@@ -77,6 +85,6 @@ public class ProxyApplication {
 
 	public interface JenkinsWebhookClient {
 		@PostExchange(url = "/github-webhook", contentType = MediaType.APPLICATION_JSON_VALUE)
-		String sendWebhook(@RequestBody String requestBody);
+		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
 	}
 }
