@@ -100,12 +100,12 @@ public class ProxyApplication {
 	}
 
 	public interface CoreEngineeringJenkinsWebhookClient {
-		@PostExchange(url = "/github-webhook", contentType = MediaType.APPLICATION_JSON_VALUE)
+		@PostExchange(url = "/github-webhook/", contentType = MediaType.APPLICATION_JSON_VALUE)
 		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
 	}
 
 	public interface ApimJenkinsWebhookClient {
-		@PostExchange(url = "/github-webhook", contentType = MediaType.APPLICATION_JSON_VALUE)
+		@PostExchange(url = "/github-webhook/", contentType = MediaType.APPLICATION_JSON_VALUE)
 		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
 	}
 }
