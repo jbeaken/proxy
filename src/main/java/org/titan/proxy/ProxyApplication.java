@@ -14,7 +14,6 @@ import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.annotation.PostExchange;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,13 +29,15 @@ public class ProxyApplication {
 
 	@RestController
 	class ProxyController {
-		private final JenkinsWebhookClient jenkinsWebhookClient;
+		private final CoreEngineeringJenkinsWebhookClient coreEngineeringJenkinsWebhookClient;
+		private final ApimJenkinsWebhookClient apimJenkinsWebhookClient;
 
-        ProxyController(JenkinsWebhookClient jenkinsWebhookClient) {
-            this.jenkinsWebhookClient = jenkinsWebhookClient;
+        ProxyController(CoreEngineeringJenkinsWebhookClient coreEngineeringJenkinsWebhookClient, ApimJenkinsWebhookClient apimJenkinsWebhookClient) {
+            this.coreEngineeringJenkinsWebhookClient = coreEngineeringJenkinsWebhookClient;
+            this.apimJenkinsWebhookClient = apimJenkinsWebhookClient;
         }
 
-        @PostMapping("/proxy")
+        @PostMapping("/apim")
 		void post(@RequestBody String body, HttpServletRequest request) {
 			Map<String, String> headers = Collections.list(request.getHeaderNames())
 					.stream()
@@ -47,10 +48,10 @@ public class ProxyApplication {
 			log.info("headers: {}", headers);
 			log.info("request body {}", body);
 
-			jenkinsWebhookClient.sendWebhook(body, headers);
+			apimJenkinsWebhookClient.sendWebhook(body, headers);
 		}
 
-		@PostMapping("/jenkins")
+		@PostMapping("/core")
 		void jenkins(@RequestBody String body, HttpServletRequest request) {
 			Map<String, String> headers = Collections.list(request.getHeaderNames())
 					.stream()
@@ -61,14 +62,14 @@ public class ProxyApplication {
 			log.info("headers: {}", headers);
 			log.info("request body {}", body);
 			
-			jenkinsWebhookClient.sendWebhook(body, headers);
+			coreEngineeringJenkinsWebhookClient.sendWebhook(body, headers);
 		}
 	}
 
 	@Configuration
     static class AppConfig {
 		@Bean
-		public JenkinsWebhookClient kongAdminApiClient(RestClient.Builder restClientBuilder) {
+		public CoreEngineeringJenkinsWebhookClient coreEngineeringJenkins(RestClient.Builder restClientBuilder) {
 
 			RestClient webClient = restClientBuilder
 					.baseUrl("https://jenkins.sandbox.kong-nonprod.cortex.elsevier.systems")
@@ -79,11 +80,31 @@ public class ProxyApplication {
 					.builderFor(RestClientAdapter.create(webClient))
 					.build();
 
-			return httpServiceProxyFactory.createClient(JenkinsWebhookClient.class);
+			return httpServiceProxyFactory.createClient(CoreEngineeringJenkinsWebhookClient.class);
+		}
+
+		@Bean
+		public ApimJenkinsWebhookClient apimJenkins(RestClient.Builder restClientBuilder) {
+
+			RestClient webClient = restClientBuilder
+					.baseUrl("http://dev-jenkins.dev-jenkins.svc.cluster.local:8080")
+					.defaultHeader("test", "test")
+					.build();
+
+			HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
+					.builderFor(RestClientAdapter.create(webClient))
+					.build();
+
+			return httpServiceProxyFactory.createClient(ApimJenkinsWebhookClient.class);
 		}
 	}
 
-	public interface JenkinsWebhookClient {
+	public interface CoreEngineeringJenkinsWebhookClient {
+		@PostExchange(url = "/github-webhook", contentType = MediaType.APPLICATION_JSON_VALUE)
+		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
+	}
+
+	public interface ApimJenkinsWebhookClient {
 		@PostExchange(url = "/github-webhook", contentType = MediaType.APPLICATION_JSON_VALUE)
 		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
 	}
