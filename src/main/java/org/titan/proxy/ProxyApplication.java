@@ -37,8 +37,24 @@ public class ProxyApplication {
             this.apimJenkinsWebhookClient = apimJenkinsWebhookClient;
         }
 
+		@PostMapping("/github-webhook/")
+		void githubWebhook(@RequestBody String body, HttpServletRequest request) {
+			Map<String, String> headers = Collections.list(request.getHeaderNames())
+					.stream()
+					.filter(headerName -> !headerName.equals("content-length"))
+					.collect(Collectors.toMap(h -> h, request::getHeader));
+
+			log.info(request.toString());
+			log.info(request.getRequestURI());
+			log.info("headers: {}", headers);
+			log.info("request body {}", body);
+
+//			apimJenkinsWebhookClient.sendWebhook(body);
+			apimJenkinsWebhookClient.sendWebhook(body, headers);
+		}
+
         @PostMapping("/apim")
-		void post(@RequestBody String body, HttpServletRequest request) {
+		void apim(@RequestBody String body, HttpServletRequest request) {
 			Map<String, String> headers = Collections.list(request.getHeaderNames())
 					.stream()
 					.filter(headerName -> !headerName.equals("content-length"))
@@ -54,7 +70,7 @@ public class ProxyApplication {
 		}
 
 		@PostMapping("/core")
-		void jenkins(@RequestBody String body, HttpServletRequest request) {
+		void core(@RequestBody String body, HttpServletRequest request) {
 			Map<String, String> headers = Collections.list(request.getHeaderNames())
 					.stream()
 					.collect(Collectors.toMap(h -> h, request::getHeader));
