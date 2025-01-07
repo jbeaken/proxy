@@ -46,44 +46,14 @@ public class ProxyApplication {
 
 			log.info(request.toString());
 			log.info(request.getRequestURI());
-			log.info("headers: {}", headers);
-			log.info("request body {}", body);
+			log.debug("headers: {}", headers);
+			log.debug("request body {}", body);
 
 			String ceResult = coreEngineeringJenkinsWebhookClient.sendWebhook(body, headers);
 			String apimResult = apimJenkinsWebhookClient.sendWebhook(body, headers);
 
 			log.info("ceResult: {}", ceResult);
 			log.info("apimResult {}", apimResult);
-		}
-
-        @PostMapping("/apim")
-		void apim(@RequestBody String body, HttpServletRequest request) {
-			Map<String, String> headers = Collections.list(request.getHeaderNames())
-					.stream()
-					.filter(headerName -> !headerName.equals("content-length"))
-					.collect(Collectors.toMap(h -> h, request::getHeader));
-
-			log.info(request.toString());
-			log.info(request.getRequestURI());
-			log.info("headers: {}", headers);
-			log.info("request body {}", body);
-
-//			apimJenkinsWebhookClient.sendWebhook(body);
-			apimJenkinsWebhookClient.sendWebhook(body, headers);
-		}
-
-		@PostMapping("/core")
-		void core(@RequestBody String body, HttpServletRequest request) {
-			Map<String, String> headers = Collections.list(request.getHeaderNames())
-					.stream()
-					.collect(Collectors.toMap(h -> h, request::getHeader));
-
-			log.info(request.toString());
-			log.info(request.getRequestURI());
-			log.info("headers: {}", headers);
-			log.info("request body {}", body);
-			
-			coreEngineeringJenkinsWebhookClient.sendWebhook(body, headers);
 		}
 	}
 
@@ -126,6 +96,5 @@ public class ProxyApplication {
 	public interface ApimJenkinsWebhookClient {
 		@PostExchange(url = "/github-webhook/")
 		String sendWebhook(@RequestBody String requestBody, @RequestHeader Map<String, String> headers);
-//		String sendWebhook(@RequestBody String requestBody);
 	}
 }
