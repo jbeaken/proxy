@@ -49,8 +49,11 @@ public class ProxyApplication {
 			log.info("headers: {}", headers);
 			log.info("request body {}", body);
 
-//			apimJenkinsWebhookClient.sendWebhook(body);
-			apimJenkinsWebhookClient.sendWebhook(body, headers);
+			String ceResult = coreEngineeringJenkinsWebhookClient.sendWebhook(body, headers);
+			String apimResult = apimJenkinsWebhookClient.sendWebhook(body, headers);
+
+			log.info("ceResult: {}", ceResult);
+			log.info("apimResult {}", apimResult);
 		}
 
         @PostMapping("/apim")
@@ -90,7 +93,7 @@ public class ProxyApplication {
 		public CoreEngineeringJenkinsWebhookClient coreEngineeringJenkins(RestClient.Builder restClientBuilder) {
 
 			RestClient webClient = restClientBuilder
-					.baseUrl("https://jenkins.sandbox.kong-nonprod.cortex.elsevier.systems")
+					.baseUrl("http://jenkins.sandbox-ci.svc.cluster.local:8080")
 					.build();
 
 			HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
