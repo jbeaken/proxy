@@ -19,7 +19,7 @@ build:
             target: /platform/bindings/new-relic
             options: "ro"
         env:
-          - BP_JVM_VERSION=17
+          - BP_JVM_VERSION=21
           - BP_LOG_LEVEL=INFO
           - BP_GRADLE_BUILT_ARTIFACT=build/libs/*.jar
           - BP_GRADLE_BUILD_ARGUMENTS=--no-daemon -Dorg.gradle.welcome=never assemble

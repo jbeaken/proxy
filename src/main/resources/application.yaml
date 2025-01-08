@@ -9,7 +9,7 @@ management:
       enabled: true
   endpoint:
     env:
-      enabled: true
+      access: read_only
     health:
       probes:
         enabled: true
