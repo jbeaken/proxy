@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         generateStubs = true,
         ids = {"org.titan.proxy:jenkins-contract-producer:stubs:${wiremock.server.port}"})
 @AutoConfigureMockMvc
-public class WiremockIT extends AbstractTest {
+public class ProxyApplicationIT extends AbstractTest {
 
     @Autowired
     private MockMvc mockMvc;
