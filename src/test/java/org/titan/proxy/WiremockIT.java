@@ -19,8 +19,8 @@ import java.util.Map;
 @AutoConfigureStubRunner(
         stubsMode = StubRunnerProperties.StubsMode.CLASSPATH,
         generateStubs = true,
-        ids = {"org.titan.proxy:jenkins-contract-producer:${wiremock.server.port}"})
-public class AbstractWiremockIT {
+        ids = {"org.titan.proxy:jenkins-contract-producer:stubs:${wiremock.server.port}"})
+public class WiremockIT {
 
     @Autowired
     ProxyService proxyService;
