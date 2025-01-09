@@ -25,7 +25,6 @@ public class AbstractWiremockIT {
     @Autowired
     ProxyService proxyService;
 
-    // Using the WireMock APIs in the normal way:
     @Test
     public void contextLoads() throws Exception {
         proxyService.githubWebhook("body", Map.of("Content-Type", "application/json"));
