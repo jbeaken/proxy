@@ -29,12 +29,22 @@ public class WiremockIT extends AbstractTest {
     private MockMvc mockMvc;
 
     @Test
-    public void contextLoads() throws Exception {
+    public void success() throws Exception {
         String jsonContent = new String(Files.readAllBytes(Paths.get("src/test/resources/payload.json")));
 
         mockMvc.perform(post("/github-webhook/")
                         .contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonContent)
                         .content(jsonContent))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    public void error() throws Exception {
+        String jsonContent = new String(Files.readAllBytes(Paths.get("src/test/resources/payload-error.json")));
+
+        mockMvc.perform(post("/github-webhook/")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonContent)
+                        .content(jsonContent))
+                .andExpect(status().is5xxServerError());
     }
 }

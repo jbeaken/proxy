@@ -1,0 +1,16 @@
+request:
+  method: POST
+  url: /github-webhook/
+  headers:
+    Content-Type: application/json;charset=UTF-8
+  body:
+    before: 3456f041cf5e3c0e8cdad97930eddcae86c4f11b
+  matchers:
+    body:
+      - path: $.before
+        type: by_regex
+        value: 3456f041cf5e3c0e8cdad97930eddcae86c4f11b
+response:
+  status: 500
+  headers:
+    Content-Type: application/json
