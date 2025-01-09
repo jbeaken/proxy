@@ -33,7 +33,7 @@ public class WiremockIT extends AbstractTest {
         String jsonContent = new String(Files.readAllBytes(Paths.get("src/test/resources/payload.json")));
 
         mockMvc.perform(post("/github-webhook/")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE).content("hello")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonContent)
                         .content(jsonContent))
                 .andExpect(status().isOk());
     }

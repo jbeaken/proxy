@@ -3,11 +3,13 @@ request:
   url: /github-webhook/
   headers:
     Content-Type: application/json;charset=UTF-8
+  body:
+    before: 3f0ef041cf5e3c0e8cdad97930eddcae86c4f11b
   matchers:
     body:
-      - path: $.food
+      - path: $.before
         type: by_regex
-        value: baddr
+        value: 3f0ef041cf5e3c0e8cdad97930eddcae86c4f11b
 response:
   status: 200
   headers:
