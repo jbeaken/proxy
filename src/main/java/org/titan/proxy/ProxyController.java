@@ -1,6 +1,8 @@
 package org.titan.proxy;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,14 +13,13 @@ import java.util.stream.Collectors;
 
 @RestController
 class ProxyController {
-    private final ProxyApplication proxyApplication;
-    private final CoreEngineeringJenkinsWebhookClient coreEngineeringJenkinsWebhookClient;
-    private final ApimJenkinsWebhookClient apimJenkinsWebhookClient;
 
-    ProxyController(ProxyApplication proxyApplication, CoreEngineeringJenkinsWebhookClient coreEngineeringJenkinsWebhookClient, ApimJenkinsWebhookClient apimJenkinsWebhookClient) {
-        this.proxyApplication = proxyApplication;
-        this.coreEngineeringJenkinsWebhookClient = coreEngineeringJenkinsWebhookClient;
-        this.apimJenkinsWebhookClient = apimJenkinsWebhookClient;
+    final Logger log = LoggerFactory.getLogger(ProxyController.class);
+
+    private final ProxyService proxyService;
+
+    ProxyController(ProxyService proxyService) {
+        this.proxyService = proxyService;
     }
 
     @PostMapping("/github-webhook/")
@@ -28,15 +29,9 @@ class ProxyController {
                 .filter(headerName -> !headerName.equals("content-length"))
                 .collect(Collectors.toMap(h -> h, request::getHeader));
 
-        proxyApplication.log.info(request.toString());
-        proxyApplication.log.info(request.getRequestURI());
-        proxyApplication.log.debug("headers: {}", headers);
-        proxyApplication.log.debug("request body {}", body);
+        log.info(request.toString());
+        log.info(request.getRequestURI());
 
-        String ceResult = coreEngineeringJenkinsWebhookClient.sendWebhook(body, headers);
-        String apimResult = apimJenkinsWebhookClient.sendWebhook(body, headers);
-
-        proxyApplication.log.info("ceResult: {}", ceResult);
-        proxyApplication.log.info("apimResult {}", apimResult);
+        proxyService.githubWebhook(body, headers);
     }
 }
