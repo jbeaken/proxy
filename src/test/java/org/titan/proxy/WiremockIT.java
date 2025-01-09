@@ -9,6 +9,9 @@ import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,8 +30,11 @@ public class WiremockIT extends AbstractTest {
 
     @Test
     public void contextLoads() throws Exception {
+        String jsonContent = new String(Files.readAllBytes(Paths.get("src/test/resources/payload.json")));
+
         mockMvc.perform(post("/github-webhook/")
-                        .contentType(MediaType.APPLICATION_JSON_VALUE).content("hello"))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE).content("hello")
+                        .content(jsonContent))
                 .andExpect(status().isOk());
     }
 }
