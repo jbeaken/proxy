@@ -1,29 +1,25 @@
 package org.titan.proxy;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.contract.stubrunner.junit.StubRunnerRule;
 import org.springframework.cloud.contract.stubrunner.spring.AutoConfigureStubRunner;
 import org.springframework.cloud.contract.stubrunner.spring.StubRunnerProperties;
-import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-
 @ActiveProfiles("test")
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
+        "captain-hook.jenkins.apim.url=http://localhost:${wiremock.server.port}",
+        "captain-hook.jenkins.core-engineering.url=http://localhost:${wiremock.server.port}"})
 @AutoConfigureStubRunner(
         stubsMode = StubRunnerProperties.StubsMode.CLASSPATH,
-        ids = "org.titan.proxy:jenkins-contract-producer:+:stubs:8090")
+        generateStubs = true,
+        ids = {"org.titan.proxy:jenkins-contract-producer:${wiremock.server.port}"})
 public class AbstractWiremockIT {
 
     @Autowired
@@ -32,9 +28,6 @@ public class AbstractWiremockIT {
     // Using the WireMock APIs in the normal way:
     @Test
     public void contextLoads() throws Exception {
-
-        proxyService.githubWebhook("body", Map.of());
-
+        proxyService.githubWebhook("body", Map.of("Content-Type", "application/json"));
     }
-
 }
