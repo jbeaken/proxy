@@ -24,10 +24,16 @@ class ProxyService {
         log.debug("headers: {}", headers);
         log.debug("request body {}", body);
 
-        String ceResult = coreEngineeringJenkinsWebhookClient.sendWebhook(body, headers);
-        String apimResult = apimJenkinsWebhookClient.sendWebhook(body, headers);
+        try {
+           coreEngineeringJenkinsWebhookClient.sendWebhook(body, headers);
+        } catch (Exception e) {
+            throw new ProxyException(e.getMessage());
+        }
 
-        log.info("ceResult: {}", ceResult);
-        log.info("apimResult {}", apimResult);
+        try {
+            apimJenkinsWebhookClient.sendWebhook(body, headers);
+        } catch (Exception e) {
+            throw new ProxyException(e.getMessage());
+        }
     }
 }
