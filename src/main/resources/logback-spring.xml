@@ -3,7 +3,7 @@
 
     <springProperty scope="context" name="springAppName" source="spring.application.name"/>
 
-    <springProfile name="default">
+    <springProfile name="default,kubernetes">
        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
         <appender name="console-appender" class="ch.qos.logback.core.ConsoleAppender">
@@ -19,7 +19,7 @@
 
     </springProfile>
 
-    <springProfile name="kubernetes">
+    <springProfile name="kuberneetes">
 
         <appender name="console-appender" class="ch.qos.logback.core.ConsoleAppender">
             <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>

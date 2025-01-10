@@ -1,6 +1,10 @@
 spring:
   application:
     name: proxy
+  cloud:
+    kubernetes:
+      config:
+        enableApi: false
 management:
   health:
     livenessstate:
